@@ -14651,7 +14651,7 @@ UA_EndpointUrl_split_ptr(const char *endpointUrl, char *hostname,
                          const char ** port, const char **path) {
     if (!endpointUrl || !hostname)
         return UA_STATUSCODE_BADINVALIDARGUMENT;
-
+ 
     size_t urlLength = strlen(endpointUrl);
     if(urlLength < 10 || urlLength >= 256)
         return UA_STATUSCODE_BADOUTOFRANGE;
@@ -25996,13 +25996,15 @@ ServerNetworkLayerTCP_add(ServerNetworkLayerTCP *layer, UA_Int32 newsockfd) {
     if(!c)
         return UA_STATUSCODE_BADINTERNALERROR;
 
-    struct sockaddr_in addr;
-    socklen_t addrlen = sizeof(struct sockaddr_in);
+    struct sockaddr_in6 addr;
+	char addrstr[100];
+    socklen_t addrlen = sizeof(struct sockaddr_in6);
     int res = getpeername(newsockfd, (struct sockaddr*)&addr, &addrlen);
     if(res == 0) {
         UA_LOG_INFO(layer->logger, UA_LOGCATEGORY_NETWORK,
                     "Connection %i | New connection over TCP from %s:%d",
-            newsockfd, inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+            newsockfd, inet_ntop(AF_INET6, &(addr.sin6_addr), addrstr, INET6_ADDRSTRLEN),
+            ntohs(addr.sin6_port));
     } else {
         UA_LOG_WARNING(layer->logger, UA_LOGCATEGORY_NETWORK,
                        "Connection %i | New connection over TCP, "
@@ -26055,7 +26057,7 @@ ServerNetworkLayerTCP_start(UA_ServerNetworkLayer *nl, UA_Logger logger) {
     UA_String_copy(&du, &nl->discoveryUrl);
 
     /* Create the server socket */
-    SOCKET newsock = socket(PF_INET, SOCK_STREAM, 0);
+    SOCKET newsock = socket(PF_INET6, SOCK_STREAM, 0);
 #ifdef _WIN32
     if(newsock == INVALID_SOCKET)
 #else
@@ -26079,9 +26081,10 @@ ServerNetworkLayerTCP_start(UA_ServerNetworkLayer *nl, UA_Logger logger) {
     }
 
     /* Bind socket to address */
-    const struct sockaddr_in serv_addr = {
-        .sin_family = AF_INET, .sin_addr.s_addr = INADDR_ANY,
-        .sin_port = htons(layer->port), .sin_zero = {0}};
+    const struct sockaddr_in6 serv_addr = {
+        .sin6_family = AF_INET6, 
+		.sin6_addr = in6addr_any,
+        .sin6_port = htons(layer->port)};
     if(bind(newsock, (const struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
         UA_LOG_WARNING(layer->logger, UA_LOGCATEGORY_NETWORK,
                        "Error during binding of the server socket");
