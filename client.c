@@ -3,7 +3,7 @@
 int main(int argc, char *argv[])
 {
 	UA_Client *client = UA_Client_new(UA_ClientConfig_standard);
-	UA_StatusCode retval = UA_Client_connect(client, "opc.tcp://ip6-localhost:16664");
+	UA_StatusCode retval = UA_Client_connect(client, "opc.tcp://[ip6-localhost]:16664/path");
 	if(retval != UA_STATUSCODE_GOOD) {
 	UA_Client_delete(client);
 	return retval;

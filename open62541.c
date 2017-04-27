@@ -14681,9 +14681,9 @@ UA_EndpointUrl_split_ptr(const char *endpointUrl, char *hostname,
             break;
     }
 
-    memcpy(hostname, &endpointUrl[10], portpos - 10);
-    hostname[portpos-10] = 0;
-
+    memcpy(hostname, &endpointUrl[11], portpos - 12);
+    hostname[portpos-12] = 0;
+    printf("%s\n",hostname);
     if(port) {
         if (portpos < urlLength - 1) {
             if (endpointUrl[portpos] == '/')
@@ -26325,7 +26325,7 @@ UA_ClientConnectionTCP(UA_ConnectionConfig localConf, const char *endpointUrl,
     struct addrinfo hints, *server;
     memset(&hints, 0, sizeof(hints));
     hints.ai_socktype = SOCK_STREAM;
-    hints.ai_family = AF_INET;
+    hints.ai_family = AF_UNSPEC;
     char portStr[6];
 #ifndef _MSC_VER
     snprintf(portStr, 6, "%d", port);

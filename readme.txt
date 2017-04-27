@@ -1,0 +1,1 @@
+本库包括一个服务器和一个客户端，均支持ipv4、ipv6，但客户端连接时，需要将主机名或ip地址括起来，即如[hostname/address]：prot/path,有时系统的IPV6点分十六进制地址无法连接，此时需要自己配置IP(ifconfig eth0 inet6 add IPV6)
